@@ -7,7 +7,8 @@
 
 <h1>Get QNA Questions</h1>
 
-
+<p><em>First you have a list of answers, when you click on the View button  you will see at the end another table with the questions related to that answer and a button to delete each one.</em></p>
+<p><em>When you have finished, the save button will synchronise the questions with the knowledge base.</em></p>
 
 @if (qnaDocuments == null)
 {
@@ -22,32 +23,40 @@ else
     if (qnaDocuments.Count != 0)
     {
 
-        <table>
-            <tr>
-                <th>Question</th>
-                <th>Amount</th>
-                <th>Button</th>
-            </tr>
-
-
-            @foreach (var pair in qnaDocuments)
-            {
+        <div>
+            <table>
                 <tr>
-                    <td>@pair.Answer</td>
-                    <td>@pair.Questions.Count</td>
-                    <td><button @onclick="() => SeeQuestion(pair)">See</button></td>
+                    <th>Question</th>
+                    <th>Amount</th>
+                    <th>Button</th>
                 </tr>
-            }
 
-        </table>
+
+                @foreach (var pair in qnaDocuments)
+                {
+                    <tr>
+                        <td>@pair.Answer</td>
+                        <td>@pair.Questions.Count</td>
+                        <td><button @onclick="() => SeeQuestion(pair)">View</button></td>
+                    </tr>
+                }
+            </table>
+        </div>
+        <br />
+        <div>
         @if (questions != null)
         {
             <table title="Questions">
-
+                <tr>
+                    <td>@qnaDocuments[id].Answer</td>
+                    <td>@qnaDocuments[id].Questions.Count</td>
+                </tr>
                 <tr>
                     <th>Response</th>
                     <th>Button</th>
                 </tr>
+
+                
                 @foreach (var question in questions)
                 {
                     <tr>
@@ -60,6 +69,7 @@ else
            
             </table>
         }
+        </div>
         <div>
             <br>
             <p><em>Click at the end</em></p>
@@ -78,7 +88,7 @@ else
     private List<QnaDocumentMin>? qnaDocuments;
     private List<String>? questions;
     private int id;
-    bool IsTaskRunning = false;
+    private bool IsTaskRunning = false;
 
 
     private KeysModel _keys = new KeysModel
@@ -93,9 +103,16 @@ else
     async void Load()
     {
 
-        IsTaskRunning = true;
-        qnaDocuments = await qnaService.GetBadQna(_keys);
-        StateHasChanged();
+        if (!IsTaskRunning)
+        {
+            IsTaskRunning = true;
+            StateHasChanged();
+            
+            
+            var x = await qnaService.GetBadQna(_keys);
+            qnaDocuments = x;
+        }
+
 
     }
 
