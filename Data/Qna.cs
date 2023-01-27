@@ -14,13 +14,13 @@ namespace TrimQnaMaker.Data
     public partial class KeysModel
     {
         //Supported Cognitive Services endpoint
-        public string endpoint;
+        public string endpoint { get; set; }
         //Ocp-Apim-Subscription-Key
-        public string subscriptionId;
+        public string subscriptionId { get; set; }
         //Knowledgebase id 
-        public string kbid;
+        public string kbid { get; set; }
         //Amount of questions to filter
-        public int amount;
+        public int amount { get; set; }
     }
     public partial class QnaDocumentMin
     {

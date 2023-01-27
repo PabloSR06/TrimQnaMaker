@@ -7,21 +7,36 @@
 
 <h1>Get QNA Questions</h1>
 
-<p><em>First you have a list of answers, when you click on the View button  you will see at the end another table with the questions related to that answer and a button to delete each one.</em></p>
-<p><em>When you have finished, the save button will synchronise the questions with the knowledge base.</em></p>
+
 
 @if (qnaDocuments == null)
 {
-    <p><em>Have you change the keys in the code?</em></p>
     <p><em>Sometimes take a while</em></p>
-    <button disabled=@IsTaskRunning @onclick="() => Load()">
-        Load Data
-    </button>
+    <div class="form">
+
+        <input type="text" @bind="_keys.endpoint" placeholder="Supported Cognitive Services endpoint" />
+
+        <input type="text" @bind="_keys.subscriptionId" placeholder="Ocp-Apim-Subscription-Key" />
+
+        <input type="text" @bind="_keys.kbid" placeholder="Knowledgebase id " />
+
+        <input type="number" @bind="_keys.amount" placeholder="Amount of questions to filter" />
+
+
+        <button disabled=@IsTaskRunning @onclick="() => Load()">
+            Load Data
+        </button>
+    </div>
+
+
+    
 }
 else
 {
     if (qnaDocuments.Count != 0)
     {
+        <p><em>First you have a list of answers, when you click on the View button  you will see at the end another table with the questions related to that answer and a button to delete each one.</em></p>
+        <p><em>When you have finished, the save button will synchronise the questions with the knowledge base.</em></p>
 
         <div>
             <table>
@@ -90,16 +105,22 @@ else
     private int id;
     private bool IsTaskRunning = false;
 
+    private KeysModel _keys;
 
-    private KeysModel _keys = new KeysModel
+
+    protected override async Task OnInitializedAsync()
+    {
+        _keys =  new KeysModel
         {
             endpoint = "https://westus.api.cognitive.microsoft.com",
             subscriptionId = "",
             kbid = "",
-            amount = 9,
+            amount = 300,
         };
 
+    }
 
+    
     async void Load()
     {
 
@@ -107,10 +128,11 @@ else
         {
             IsTaskRunning = true;
             StateHasChanged();
-            
-            
-            var x = await qnaService.GetBadQna(_keys);
-            qnaDocuments = x;
+
+            if (_keys != null)
+            {
+                qnaDocuments = await qnaService.GetBadQna(_keys);
+            }
         }
 
 
