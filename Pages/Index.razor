@@ -1,0 +1,132 @@
+﻿@page "/"
+
+<PageTitle>Get QNA</PageTitle>
+
+@using TrimQnaMaker.Data
+@inject QnAMakerService qnaService
+
+<h1>Get QNA Questions</h1>
+
+
+
+@if (qnaDocuments == null)
+{
+    <p><em>Have you change the keys in the code?</em></p>
+    <p><em>Sometimes take a while</em></p>
+    <button disabled=@IsTaskRunning @onclick="() => Load()">
+        Load Data
+    </button>
+}
+else
+{
+    if (qnaDocuments.Count != 0)
+    {
+
+        <table>
+            <tr>
+                <th>Question</th>
+                <th>Amount</th>
+                <th>Button</th>
+            </tr>
+
+
+            @foreach (var pair in qnaDocuments)
+            {
+                <tr>
+                    <td>@pair.Answer</td>
+                    <td>@pair.Questions.Count</td>
+                    <td><button @onclick="() => SeeQuestion(pair)">See</button></td>
+                </tr>
+            }
+
+        </table>
+        @if (questions != null)
+        {
+            <table title="Questions">
+
+                <tr>
+                    <th>Response</th>
+                    <th>Button</th>
+                </tr>
+                @foreach (var question in questions)
+                {
+                    <tr>
+                    <td>@question</td>
+                        <td><button @onclick="() => DeleteQuestion(question)">X</button></td>
+
+                    </tr>
+
+                }
+           
+            </table>
+        }
+        <div>
+            <br>
+            <p><em>Click at the end</em></p>
+            <button @onclick="() => Save()">Save</button>
+        </div>
+    }
+    else
+    {
+        <p><em>Mmm is empty , maybe there is not any or something went wrong</em></p>
+
+    }
+
+}
+
+@code {
+    private List<QnaDocumentMin>? qnaDocuments;
+    private List<String>? questions;
+    private int id;
+    bool IsTaskRunning = false;
+
+
+    private KeysModel _keys = new KeysModel
+        {
+            endpoint = "https://westus.api.cognitive.microsoft.com",
+            subscriptionId = "",
+            kbid = "",
+            amount = 9,
+        };
+
+
+    async void Load()
+    {
+
+        IsTaskRunning = true;
+        qnaDocuments = await qnaService.GetBadQna(_keys);
+        StateHasChanged();
+
+    }
+
+    async void Save()
+    {
+        if (qnaDocuments != null)
+            await qnaService.UpgradeKB(qnaDocuments, _keys);
+
+    }
+
+    void DeleteQuestion(string question)
+    {
+        if (qnaDocuments != null && questions != null)
+        {
+            questions.Remove(question);
+            if (qnaDocuments[id].QuestionToDelete == null)
+                qnaDocuments[id].QuestionToDelete = new List<string>();
+            qnaDocuments[id].QuestionToDelete.Add(question);
+            qnaDocuments[id].Questions = questions;
+            qnaDocuments[id].hasChanged = true;
+        }
+
+
+    }
+    void SeeQuestion(QnaDocumentMin pair)
+    {
+        if (qnaDocuments != null)
+        {
+            questions = pair.Questions;
+            id = qnaDocuments.IndexOf(pair);
+        }
+
+    }
+}
