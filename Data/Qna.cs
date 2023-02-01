@@ -59,4 +59,37 @@ namespace TrimQnaMaker.Data
 
     }
 
+    public partial class toUpdate
+    {
+        [JsonProperty("update")]
+        public valueToUpdate update { get; set; }
+    }
+
+    public partial class valueToUpdate
+    {
+        [JsonProperty("name")]
+        public String name { get; set; }
+        
+        [JsonProperty("qnaList")]
+        public List<DeleteQuestions> qnaList { get; set; }
+        
+    }
+
+    public partial class JobResult
+    {
+        [JsonProperty("operationState")]
+        public string OperationState { get; set; }
+
+        [JsonProperty("createdTimestamp")]
+        public DateTimeOffset CreatedTimestamp { get; set; }
+
+        [JsonProperty("lastActionTimestamp")]
+        public DateTimeOffset LastActionTimestamp { get; set; }
+
+        [JsonProperty("userId")]
+        public string UserId { get; set; }
+
+        [JsonProperty("operationId")]
+        public Guid OperationId { get; set; }
+    }
 }

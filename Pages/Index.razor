@@ -33,6 +33,8 @@
 }
 else
 {
+    
+
     if (qnaDocuments.Count != 0)
     {
         <p><em>First you have a list of answers, when you click on the View button  you will see at the end another table with the questions related to that answer and a button to delete each one.</em></p>
@@ -90,6 +92,14 @@ else
             <p><em>Click at the end</em></p>
             <button @onclick="() => Save()">Save</button>
         </div>
+        <div>
+            @if (@hasResult)
+            {
+                
+                <p>OperationId: @result.OperationId</p>
+                <p>OperationState: @result.OperationState</p>
+            }
+        </div>
     }
     else
     {
@@ -104,6 +114,9 @@ else
     private List<String>? questions;
     private int id;
     private bool IsTaskRunning = false;
+
+    private JobResult? result;
+    private bool hasResult;
 
     private KeysModel _keys;
 
@@ -120,7 +133,7 @@ else
 
     }
 
-    
+
     async void Load()
     {
 
@@ -140,8 +153,14 @@ else
 
     async void Save()
     {
-        if (qnaDocuments != null)
-            await qnaService.UpgradeKB(qnaDocuments, _keys);
+        if (qnaDocuments != null)   {
+            result = await qnaService.UpgradeKB(qnaDocuments, _keys);
+            hasResult = true;
+            StateHasChanged();
+        }
+
+
+
 
     }
 
@@ -149,12 +168,20 @@ else
     {
         if (qnaDocuments != null && questions != null)
         {
-            questions.Remove(question);
+            
+            
             if (qnaDocuments[id].QuestionToDelete == null)
                 qnaDocuments[id].QuestionToDelete = new List<string>();
-            qnaDocuments[id].QuestionToDelete.Add(question);
-            qnaDocuments[id].Questions = questions;
-            qnaDocuments[id].hasChanged = true;
+            if (qnaDocuments[id].QuestionToDelete.Count < 300)
+            {
+                questions.Remove(question);
+                qnaDocuments[id].QuestionToDelete.Add(question);
+                qnaDocuments[id].Questions = questions;
+                qnaDocuments[id].hasChanged = true;
+            }else{
+
+            }
+            
         }
 
 

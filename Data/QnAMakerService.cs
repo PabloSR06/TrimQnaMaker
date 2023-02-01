@@ -42,7 +42,7 @@ namespace TrimQnaMaker.Data
             return Task.FromResult(badPairs);
         }
 
-        public async Task<HttpStatusCode> UpgradeKB(List<QnaDocumentMin> qnas, KeysModel keys)
+        public async Task<JobResult> UpgradeKB(List<QnaDocumentMin> qnas, KeysModel keys)
         {
             HttpClient client = GetHttpClient(keys.endpoint, keys.subscriptionId);
 
@@ -64,16 +64,28 @@ namespace TrimQnaMaker.Data
                     delete.Add(toDelete);
                 }
             }
-
-            request.Content = new StringContent(JsonConvert.SerializeObject(delete), Encoding.UTF8, "application/json");
+            toUpdate update = new toUpdate();
+            update.update = new valueToUpdate();    
+            update.update.qnaList = delete;
+            var json = JsonConvert.SerializeObject(update);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await client.SendAsync(request);
 
-            if (!response.IsSuccessStatusCode)
+            var responseJson = new JobResult();
+
+            if (response.IsSuccessStatusCode)
+            {
+                responseJson = JsonConvert.DeserializeObject<JobResult>(response.Content.ReadAsStringAsync().Result);
+            }
+            else
+            {
                 throw new Exception(string.Format("Update QNA failed '{0}'", response.ReasonPhrase));
+            }
+               
 
 
-            return HttpStatusCode.Accepted;
+            return responseJson;
         }
 
         public static HttpClient GetHttpClient(string endpoint, string subscription)
